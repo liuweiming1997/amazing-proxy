@@ -23,14 +23,20 @@ func main() {
 	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%s", ServerAddress, ServerPort))
 	if err != nil {
 		log.Error("Can not resolve host, exit...", err)
-		os.Exit(1)
+		return
 	}
 	conn, err := net.ListenUDP("udp", addr)
+	defer func() {
+		log.Warning("Quit the process quietly...")
+		if conn != nil {
+			log.Warning("Closing udp connection...")
+			conn.Close()
+		}
+	}()
 	if err != nil {
 		log.Error("Error listening:",  err)
-		os.Exit(1)
+		return
 	}
-	defer conn.Close()
 	for {
 		handleClient(conn)
 	}
